@@ -16,8 +16,10 @@
 *.dvi
 *.xdv
 *-converted-to.*
-
+*.fdb_latexmk
+*.synctex.gz
 
 # Notebooks
 __pycache__
 .ipynb_checkpoints
+
