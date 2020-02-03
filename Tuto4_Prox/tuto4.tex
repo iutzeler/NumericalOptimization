@@ -1,0 +1,176 @@
+%\documentclass[paper=a4, fontsize=9pt]{article} 
+\documentclass[a4paper,twoside,10pt]{amsart}
+
+
+%\usepackage[scale=0.8]{geometry}
+\usepackage{fullpage}
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usepackage{tikz}
+\usepackage{tkz-graph}
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\newcommand{\ans}[1]{ { \color{gray} \itshape  #1} } % Create horizontal rule command with 1 argument of height
+
+\newtheorem{theo}{Theorem}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{q_td}{Exercise }
+\newcommand{\reftd}[1]{  $\circ$ \ref{#1}}
+\newtheorem{q_tp}{$\diamond$}
+\newcommand{\reftp}[1]{$\diamond$ \ref{#1}}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE 
+%----------------------------------------------------------------------------------------
+
+
+\normalfont \normalsize 
+\noindent\textsc{\small Universit\'e Grenoble Alpes }\\
+\noindent\textsc{ MSIAM 1st year} \\ [0.3cm] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\begin{center}
+{\LARGE \scshape  Numerical Optimization \\
+ Tuto 4: Proximal methods} \\ % The  title
+\end{center}
+\noindent\textsc{\hfill L. Desbat \& F. Iutzeler } 
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+
+
+
+%----------------------------------------------------------------------------------------
+%	TD
+%----------------------------------------------------------------------------------------
+%\newpage
+\setcounter{section}{0}
+\renewcommand{\thesection}{\Alph{section}} 
+\renewcommand*{\theHsection}{TD.\the\value{section}}
+
+
+\vspace*{0.5cm}
+
+\section{the Proximity operator}
+
+In non-smooth optimization, that is when the objective function is not differentiable, the gradient may not be defined at each point. Instead, for any point $x\in\mathbb{R}$ and any convex function $g:\mathbb{R}^n \to \mathbb{R}\cup\{+\infty\}$, one can define a subdifferential $\partial g(x) \subset \mathbb{R}^n$ as 
+$$ \partial g(x) = \{ u\in\mathbb{R}^n | g(z) \geq g(x) + \langle u ; z-x \rangle \text{ for all } z\in\mathbb{R}^n \}. $$
+The optimality conditions and computation rules roughly translate.
+
+
+However, the sub-gradient algorithm $x_{k+1} = x_k - \gamma_k g_k$ where $g_k\in \partial g(x_k)$ rely on a vanishing stepsize $\gamma_k$ and is thus very slow in practice. In order to mend this case, a more evolved operator was introduced: its \emph{proximity operator} is defined for some positive constant $\gamma>0$ as
+\begin{equation}
+x = \mathbf{prox}_{\gamma g}(y) = \arg\min_{w\in\mathbb{R}^n} \left\{ \gamma g(w)  + \frac{1}{2} \left\|  w - y \right\|^2  \right\}  .
+\end{equation} 
+
+
+
+
+\begin{q_td}[First Properties]\label{td:prox0}\hfill
+
+\begin{itemize}
+\item[a.] Justify that for a proper convex function $g$, this definition as an $\arg\min$ indeed leads to a unique point. Would it still be the case if $g$ was not convex?
+\item[b.] This operation is sometimes called \emph{implicit gradient}. Find an explanation why.\\
+\emph{\small Hint: Use First order optimality conditions.}
+\item[c.] Let $x = \mathbf{prox}_{\gamma g}(y)$ and $x' = \mathbf{prox}_{\gamma g}(y')$, show that 
+$$ \|x - x'\|^2 \leq \langle x' - y ' ; x- y \rangle . $$ 
+\emph{\small Hint: if $g_{x} \in \partial g(x)$ and $g_{x'} \in \partial g(x')$, the convexity of $g$ gives $\langle x -x'; g_x - g_{x'} \rangle \geq 0$.}
+\item[d.] Deduce that 
+$$ \|x - x'\|^2 \leq \| y - y' \|^2 -  \| (x-y) - (x'-y') \|^2 $$ 
+and investigate the similarities with the gradient of a smooth function.
+\end{itemize}
+\end{q_td}
+
+\vspace*{0.5cm}
+
+We showed that the proximity operator of a convex function has the same contraction properties of a gradient operation with step $1/L$ on an $L$-smooth convex function. Let us now investigate the related algorithm.
+
+\vspace*{0.5cm}
+
+\begin{q_td}[Proximal point algorithm]\label{td:prox} The proximal point algorithm is simply obtained by successively applying the proximity operator of a function:
+$$x_{k+1} = \mathbf{prox}_{\gamma g}(x_k)$$
+\begin{itemize}
+\item[a.] Let $x^\star$ be a \emph{fixed point} of $g$ (we will suppose that such a point exists), that is  $x^\star =  \mathbf{prox}_{\gamma g}(x^\star)$. Show that $x^\star$ is a minimizer of $g$. \\
+\emph{\small Hint: Use First order optimality conditions.}
+\item[b.] Show that if $x = \mathbf{prox}_{\gamma g}(y)  $, then $g(x)\leq g(y) - \frac{1}{2\gamma} \|x-y\|^2$.\\
+\emph{\small Hint: Use that for $f$ $\mu$-strongly convex and $x^\star$ the minimizer of $f$, then $f(x^\star) \leq f(y) - \frac{\mu}{2}\|x^\star-y\|^2$.}
+\item[c.] Conclude that the \emph{Proximal Point Algorithm}  converge to a minimizer of $g$.
+\end{itemize}
+\end{q_td}
+
+\vspace*{0.5cm}
+
+Now that we have seen the optimization-wise interest of the proximity operator, let us compute it explicitly on some functions.
+
+\vspace*{0.5cm}
+
+\begin{q_td}[Proximity Operators of basic functions]
+\label{td:fun}
+Compute the proximity operators of the following functions:
+\begin{itemize}
+\item[a.] $g_1(x) = \| x \|_2^2$  .
+\item[b.] $g_2(x) = \iota_C(x)$  with $\iota_C(x) = 0$ if $x$ belongs to convex set $C$ and $+\infty$ elsewhere.
+\item[c.] $g_3(x) = \|x\|_1 $ . 
+\item[d.] $g_4(x) = \|x\|_2 $ . 
+\end{itemize}
+\end{q_td}
+
+\vspace*{0.5cm}
+
+Unfortunately, in general, no explicit formulation can be found but i) the sub-optimization problems are now strongly convex and thus easier to solve; and more interestingly ii) proximity operator can be merged with other algorithms in order to minimize general functions. These algorithms are called \emph{proximal algorithms} of which the most popular is the proximal gradient algorithm which mixes gradient and proximity operations.
+
+\vspace*{0.5cm}
+
+\section{the Proximal Gradient algorithm}
+
+
+Let us consider the \emph{composite} optimization problem
+$$ \min_{x\in\mathbb{R}^n} F(x) := f(x) + g(x)$$
+where $f:\mathbb{R}^n \to \mathbb{R}$ is $L$-smooth and convex; and $g:\mathbb{R}^n \to \mathbb{R}\cup\{+\infty\}$ is convex.  The \emph{proximal gradient algorithm} writes
+$$ x_{k+1} = \mathbf{prox}_{\gamma g}\left( x_k - \gamma \nabla f(x_k) \right) . $$
+
+\begin{q_td}[Analysis]
+\label{td:ana}\hfill
+
+
+\begin{itemize}
+\item[a.] Show that the fixed points of the iteration above are minimizers of $F$.
+\item[b.] Connect the proximal gradient with the projected gradient algorithm.
+\item[c.] Show that
+$$ F(x_{k+1}) \leq F(x_k) - \frac{(2-\gamma L)}{2\gamma} \|x_{k+1}  - x_k \|^2 . $$ 
+\emph{\small Hint: Use the descent lemmas for the gradient on smooth functions and the proximal point algorithm.}
+\item[d.] Give a range of stepsizes for which the sequence $F(x_k)$ converges as soon as minimizer exists.
+\end{itemize}
+\end{q_td}
+
+
+\vspace*{0.5cm}
+
+\begin{q_td}[Application]
+\label{td:app}
+The \emph{lasso} problem is a regularized linear regression problem that writes as 
+$$ \min_{x\in\mathbb{R}^n } \frac{1}{2}\|Ax-b\|^2 + \lambda \|x\|_1  $$
+where $A$ is a full rank $m\times n$ matrix and $b$ is a size $m$ vector.
+\begin{itemize}
+\item[a.] Write the iterations for a proximal gradient algorithm. Which stepsize can be used?
+\item[b.] The regularization $\lambda \|x\|_1$ is said to be \emph{sparsity enforcing}, guess why.
+\end{itemize}
+\end{q_td}
+
+
+
+
+\end{document}

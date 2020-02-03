@@ -1,0 +1,173 @@
+%\documentclass[paper=a4, fontsize=9pt]{article} 
+\documentclass[a4paper,twoside,10pt]{amsart}
+
+
+%\usepackage[scale=0.8]{geometry}
+\usepackage{fullpage}
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usepackage{tikz}
+\usepackage{tkz-graph}
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\newcommand{\ans}[1]{ { \color{gray} \itshape  #1} } % Create horizontal rule command with 1 argument of height
+
+\newtheorem{theo}{Theorem}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{q_td}{Exercise }
+\newcommand{\reftd}[1]{  $\circ$ \ref{#1}}
+\newtheorem{q_tp}{$\diamond$}
+\newcommand{\reftp}[1]{$\diamond$ \ref{#1}}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE 
+%----------------------------------------------------------------------------------------
+
+
+\normalfont \normalsize 
+\noindent\textsc{\small Universit\'e Grenoble Alpes }\\
+\noindent\textsc{\small MSIAM 1st year} \\ [0.3cm] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\begin{center}
+{\LARGE \scshape  Numerical Optimization \\ Tuto 6: Linear and Quadratic Programs} \\ % The  title
+\end{center}
+\noindent\textsc{\hfill L. Desbat \& F. Iutzeler } 
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+
+
+
+%----------------------------------------------------------------------------------------
+%	TD
+%----------------------------------------------------------------------------------------
+%\newpage
+\setcounter{section}{0}
+\renewcommand{\thesection}{\Alph{section}} 
+\renewcommand*{\theHsection}{TD.\the\value{section}}
+
+
+\vspace*{0.5cm}
+
+
+
+In this tutorial, we are going to investigate Linear and Quadratic problems, that is when minimizing linear or quadratic cost functions under linear inequalities constraints. Typical formulations of these problems is as such:
+
+\vspace*{0.5cm}
+
+
+\begin{minipage}{0.4\textwidth}
+\textbf{~~~~~~~~~~ Linear program (LP):}\\
+\begin{align*}
+\min_{x\in\mathbb{R}^n}  & ~~~  c^\mathrm{T} x  \\
+\text{subject to } & ~~~ Gx \leq h 
+\end{align*}
+\end{minipage}\hfill
+\begin{minipage}{0.4\textwidth}
+\textbf{~~~~~ Quadratic program (QP):}
+\begin{align*}
+\min_{x\in\mathbb{R}^n}  & ~~~  \frac{1}{2} x^\mathrm{T} P x +  q^\mathrm{T} x  \\
+\text{subject to } & ~~~ Gx \leq h 
+\end{align*}
+\end{minipage}
+
+
+\vspace*{0.5cm}
+
+
+where $c,q\in\mathbb{R}^n$, $G\in\mathbb{R}^{m\times n}$, $ h\in\mathbb{R}^m$, $P\in\mathbb{R}^{n\times n}$.
+
+\vspace*{0.5cm}
+
+Altough these problems are quite specific, a number of (sub-)problems in signal and data processing can actually reformulate linearly or quadratically. The interest of these reformulation is that there exist a large number of standard libraries implementing computationally efficient LP and QP solvers\footnote{generally based on interior point, active sets, simplex, ... algorithms and variants.}.
+
+
+\vspace*{0.5cm}
+
+
+
+\begin{q_td}[Equivalent problems]\label{td:eq}
+Let $f:\mathbb{R}^n\to\mathbb{R}$; we consider the problem
+\begin{align*}
+\min_{x\in\mathbb{R}^n}  & ~~~ f(x)  \\
+\text{subject to } & ~~~ x \in C 
+\end{align*}
+and we assume that a solution $\bar{x}$ exists. Show that this problem is \emph{equivalent} to solving 
+\begin{align*}
+\min_{(x,r)\in\mathbb{R}^{n+1}}  & ~~~ r  \\
+\text{subject to } & ~~~ f(x) \leq r \\
+ & ~~~ (x,r)\in C \times \mathbb{R} \subset \mathbb{R}^{n+1} 
+\end{align*}
+in the sense that
+\begin{itemize}
+\item[(i)] if $\bar{x}$ is a solution of the first problem, then $(\bar{x}, f (\bar{x}))$ is a solution of the second one.
+\item[(ii)] if $(\bar{x},\bar{r})$ is a solution of the second problem, then $\bar{x}$ is a solution of the first one.
+\end{itemize}
+
+\end{q_td}
+
+\vspace*{0.5cm}
+
+
+\begin{q_td}[Linear reformulation]\label{td:ref}
+Let $A\in\mathbb{R}^{m\times n}$ and $ b\in\mathbb{R}^m$. Reformulate the problem 
+\begin{align*}
+\min_{x\in\mathbb{R}^n}  & ~~~ \|Ax-b\|_\infty 
+\end{align*}
+as a linear problem. Notably, give the corresponding $(c,G,h)$ from the LP formulation.
+
+\end{q_td}
+
+\newpage
+
+\begin{q_td}[Linear reformulation II]\label{td:ref2}
+Let $A\in\mathbb{R}^{m\times n}$ and $ b\in\mathbb{R}^m$. Reformulate the problem 
+\begin{align*}
+\min_{x\in\mathbb{R}^n}  & ~~~ \|Ax-b\|_1
+\end{align*}
+as a linear problem by extending the technique of Ex.~\ref{td:eq} (without giving details). Notably, give the corresponding $(c,G,h)$ from the LP formulation. 
+
+
+Do the same for the problem 
+\begin{align*}
+\min_{x\in\mathbb{R}^n}  & ~~~ \|x\|_1\\
+\text{subject to } & ~~~ \|Ax-b\|_\infty  \leq 1
+\end{align*}
+
+\end{q_td}
+
+\vspace*{0.5cm}
+
+\begin{q_td}[Quadratic reformulation]\label{td:ref2}
+We consider the regression model
+$$ y=X\theta+\xi,\;\;\xi\sim \mathcal{N}(0, \sigma I_m), $$
+where $X\in \mathbb{R}^{m\times n}$ and $y\in \mathbb{R}^m$ are the observed values and $\theta\in \mathbb{R}^n$ is the unknown parameter we want to find. Show that maximizing the (log-)likelihood of $\theta$ amount to minimizing $\|X\theta-y\|_2^2$.  
+
+Reformulate the maximum likelihood problem under bounded output error as a Quadratic problem. 
+\begin{align*}
+\max_{\theta \in\mathbb{R}^n}  & ~~~ \text{likelihood}(\theta) = p(y|\theta) \\
+\text{subject to } & ~~~  | y_i - X_i \theta |  \leq \varepsilon
+\end{align*}
+\emph{($X_i$) is the row vector of the $i$-th line of $X$.}
+
+
+What would change if $\xi$ followed a Laplace distribution?
+\end{q_td}
+
+\vspace*{0.5cm}
+
+\end{document}

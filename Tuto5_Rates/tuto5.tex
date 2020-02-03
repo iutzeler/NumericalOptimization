@@ -1,0 +1,213 @@
+%\documentclass[paper=a4, fontsize=9pt]{article} 
+\documentclass[a4paper,twoside,10pt]{amsart}
+
+
+%\usepackage[scale=0.8]{geometry}
+\usepackage{fullpage}
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+
+\usepackage{tikz}
+\usepackage{tkz-graph}
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\newcommand{\ans}[1]{ { \color{gray} \itshape  #1} } % Create horizontal rule command with 1 argument of height
+
+\newtheorem{theo}{Theorem}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{q_td}{Exercise }
+\newcommand{\reftd}[1]{  $\circ$ \ref{#1}}
+\newtheorem{q_tp}{$\diamond$}
+\newcommand{\reftp}[1]{$\diamond$ \ref{#1}}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE 
+%----------------------------------------------------------------------------------------
+
+
+\normalfont \normalsize 
+\noindent\textsc{\small Universit\'e Grenoble Alpes  }\\
+\noindent\textsc{\small  MSIAM 1st year} \\ [0.3cm] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\begin{center}
+{\LARGE \scshape  Numerical Optimization \\ Tuto 5: Rates of first-order methods} \\ % The  title
+\end{center}
+\noindent\textsc{\hfill L. Desbat \& F. Iutzeler } 
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+
+
+
+%----------------------------------------------------------------------------------------
+%	TD
+%----------------------------------------------------------------------------------------
+%\newpage
+\setcounter{section}{0}
+\renewcommand{\thesection}{\Alph{section}} 
+\renewcommand*{\theHsection}{TD.\the\value{section}}
+
+
+\vspace*{0.5cm}
+
+In the whole tutorial, we will assume that $f: \mathbb{R}^n\to \mathbb{R}$ is an $L$-smooth \emph{convex} function with minimizers.
+
+\section{Convergence rates in the strongly convex case}
+\vspace*{0.5cm}
+
+
+\begin{q_td}[Some other descent lemmas] \label{td:descent2} \hfill
+
+The goal of this exercise is to provide useful lemmas for proving convergence rates.  Let $x^\star$ be a minimizer of $f$.
+\begin{itemize}
+\item[a.]  Show that for all $x,y\in\mathbb{R}^n$,
+$$ f(x) - f(y) \leq  \langle x- y ;  \nabla f(x) \rangle  - \frac{1}{2L} \|  \nabla f(x) - \nabla f(y)  \|^2 $$
+and thus $$  \frac{1}{L}  \|  \nabla f(x) - \nabla f(y)  \|^2 \leq  \langle x- y ;  \nabla f(x) - \nabla f(y) \rangle  \leq   L \|x-y\|^2 .$$ 
+\emph{Hint: Define $z=y - \frac{1}{L}(\nabla f(y)  -  \nabla f(x) )  $.\\ Use convexity to bound $f(x)-f(z)$ and smoothness to bound $f(z) - f(y)$ and sum both inequalities.}
+\item[b.] Let $f$ be in addition $\mu$-strongly convex; that is, $f-\frac{\mu}{2}\|\cdot\|^2 $ is convex. Show that for all $x\in\mathbb{R}^n$,
+$$ (x-x^\star)^\mathrm{T} \nabla f(x) \geq  \frac{\mu L}{\mu + L} \|x-x^\star\|^2 +  \frac{1}{\mu + L} \|\nabla f(x)\|^2 .$$
+\emph{Hint: Use the fact that $f-\frac{\mu}{2}\|\cdot\|^2 $ is $(L-\mu)$-smooth and question a. }
+\end{itemize}
+\end{q_td}
+
+
+
+\vspace*{0.5cm}
+
+
+\begin{q_td}[Strongly convex case]\label{td:str}\hfill
+
+
+The goal of this exercise is to investigate the convergence rate of the fixed stepsize gradient algorithm on a $\mu$-strongly convex, $L$-smooth function:
+$$ x_{k+1} = x_k - \frac{2}{\mu+L} \nabla f(x_k)$$
+which will introduce us to the mechanics of Optimization theory.
+\begin{itemize}
+\item[a.]  From \ref{td:descent2}b., prove that
+\begin{align*}
+ \|x_{k+1} - x^\star \|^2 &\leq \left( 1 - \frac{4\mu L}{(\mu+L)^2}\right) \|x_k - x^\star \|^2  \\
+&=  \left( \frac{\kappa - 1}{ \kappa+1}\right)^2 \|x_k - x^\star \|^2 
+\end{align*}
+where $\kappa=L/\mu$ is the \emph{conditionning number} of the problem.
+\item[b.]  Show that 
+$$ f(x_k) - f(x^\star) \leq \frac{L}{2} \|x_k - x^\star \|^2 .$$
+\item[c.]  Conclude that for the gradient algorithm with stepsize ${2}/{(\mu+L)}$ we have 
+$$ f(x_k) - f(x^\star) \leq \left( \frac{\kappa - 1}{ \kappa+1}\right)^{2k}   \frac{L\|x_0 - x^\star \|^2}{2}   . $$
+\end{itemize}
+\end{q_td}
+
+
+\vspace*{0.5cm}
+
+
+\section{Convergence rates in the non-strongly convex case}
+\vspace*{0.5cm}
+
+
+\begin{q_td}[Smooth case]\label{td:smooth}\hfill
+
+
+The goal of this exercise is to investigate the convergence rate of the fixed stepsize gradient algorithm on an $L$-smooth function:
+$$ x_{k+1} = x_k - \frac{1}{L} \nabla f(x_k)$$
+which will introduce us to the mechanics of Optimization theory.
+\begin{itemize}
+%\item[a.]  Deduce from \ref{td:descent2}a. that $ (x-x^\star)^\mathrm{T} \nabla f(x) \geq \frac{1}{2L} \|\nabla f(x) \|^2  $.
+\item[a.]  Prove that 
+$$ \|x_{k+1} - x^\star \|^2 \leq \|x_k - x^\star \|^2 -  \frac{1}{L^2} \| \nabla f(x_k) \|^2 = \|x_k - x^\star \|^2 -  \| x_{k+1} - x_k \|^2  .$$
+\item[b.]  Show that 
+$$ \delta_k := f(x_k) - f(x^\star) \leq \|x_k - x^\star \| \cdot \|\nabla f(x_k) \| \leq \|x_1 - x^\star \| \cdot \|\nabla f(x_k) \| .$$
+\emph{Hint: Use convexity then a.}
+\item[c.] Use smoothness and b. to show that 
+$$ 0 \leq \delta_{k+1} \leq \delta_k - \underbrace{\frac{1}{2L\|x_1-x^\star\|^2}}_{:=\omega}  \delta_k^2 .   $$
+\item[d.]  Deduce that 
+$$ \frac{1}{\delta_{k+1}} -  \frac{1}{\delta_{k}} \geq \omega .$$
+\emph{Hint: Divide c. by $ \delta_{k}\delta_{k+1} $}.
+\item[e.]  Conclude that for the gradient algorithm with stepsize $1/L$ we have 
+$$ f(x_k) - f(x^\star) \leq \frac{2L\|x_1-x^\star\|^2}{k-1} . $$
+\end{itemize}
+\end{q_td}
+
+
+
+\newpage
+
+
+\begin{tcolorbox}[width=\textwidth,colback={blue!5!white},title={\textbf{Optimization inequalities cheatsheet}},colbacktitle=black,coltitle=white]    
+For any function $f$:
+\begin{itemize}
+\item[(convex)] convex
+\item[(diff)] differentiable
+\item[(min)] with minimizers $X^\star$, $x^\star \in X^\star$
+\item[(smooth)] $L$-smooth (differentiable with $\nabla f$ $L$ Lipschitz continuous)
+\item[(strong)] $\mu$-strongly convex ($\mu$ can be taken equal to $0$ below)
+\end{itemize}
+
+
+\begin{align*}
+& f(y) \geq f(x) + (y-x)^\mathrm{T} \nabla f(x)  \text{ (convex) + (diff) } \\
+\Rightarrow &\langle x-y  ;  \nabla f(x)-\nabla f(y)\rangle\geq0   \text{ (convex) + (diff) } 
+\end{align*}
+
+\begin{align*}
+&  f(x^\star) \leq f(x) \forall x  \text{ (minimizer) } \\
+\Rightarrow & \nabla f(x^\star) = 0  \text{ (convex) + (diff) + (minimizer) }
+\end{align*}
+
+
+\begin{align*}
+&  \|\nabla f(x) - \nabla f(y) \| \leq L \|x-y\|  \text{ (smooth) } \\
+\Rightarrow & f(x) \leq f(y) +  (x-y)^\mathrm{T} \nabla f(y)  + \frac{L}{2} \| x-y\|^2  \text{ (smooth) } \\
+\Rightarrow  & \langle x-y  ;  \nabla f(x)-\nabla f(y)\rangle \leq L \|x-y\|^2  \text{ (smooth) }
+\end{align*}
+
+
+
+\begin{align*}
+&  f(x) - \frac{\mu}{2}\|x\|^2 \text{ is convex  }  \text{ (strong) } \\
+\Rightarrow & f(y) +  (x-y)^\mathrm{T} \nabla f(y)  + \frac{\mu}{2} \| x-y\|^2 \leq f(x)  \text{ (strong) + (diff) } \\
+\Rightarrow  & \mu \|x-y\|^2 \leq  \langle x-y  ;  \nabla f(x)-\nabla f(y)\rangle   \text{ (strong) + (diff) }
+\end{align*}
+
+
+\vspace*{1cm}
+
+Combining the above, when $f$ is $\mu$-strongly convex and $L$-smooth:
+
+\begin{align*}
+f(y) +  (x-y)^\mathrm{T} \nabla f(y)  + \frac{\mu}{2} \| x-y\|^2 \leq f(x) \leq f(y) +  (x-y)^\mathrm{T} \nabla f(y)  + \frac{L}{2} \| x-y\|^2
+\end{align*}
+
+
+
+\begin{align*}
+\frac{\mu L}{\mu + L} \|x-y\|^2  +  \frac{1}{\mu  +  L} \|\nabla f(x) - \nabla f(y) \|^2   \leq  \langle x-y  ;  \nabla f(x)-\nabla f(y)\rangle \leq L \|x-y\|^2 
+\end{align*}
+
+
+If in addition, $f$ is twice differentiable,
+\begin{align*}
+\mu I  \leq  \nabla^2 f(x) \leq L  I  
+\end{align*}
+
+\end{tcolorbox}    
+
+
+
+
+
+
+
+\end{document}
