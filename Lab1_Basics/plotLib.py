@@ -16,7 +16,9 @@ def custom_3dplot( f, x1_min,x1_max,x2_min,x2_max,nb_points, v_min, v_max ):
 	z = f_no_vector(x,y)
 
 	fig = plt.figure()
-	ax = fig.gca(projection='3d')
+    # Old syntax
+    # ax = fig.gca(projection='3d')
+	ax = fig.add_subplot(projection='3d')
 	ax.plot_surface(x, y, z,   cmap=cm.hot , vmin = v_min, vmax =  v_max)
 	ax.set_zlim(v_min, v_max)
 	plt.show()
