@@ -77,6 +77,8 @@ def newton_algorithm(f , f_grad_hessian , x0 , PREC , ITE_MAX ):
     print("------------------------------------\nNewton's algorithm\n------------------------------------\nSTART")
     t_s =  timeit.default_timer()
     for k in range(ITE_MAX):
+
+        g, H = f_grad_hessian(x)
     
         ### COMPLETE
 
