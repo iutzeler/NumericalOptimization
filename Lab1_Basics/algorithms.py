@@ -82,6 +82,8 @@ def newton_algorithm(f , f_grad_hessian , x0 , PREC , ITE_MAX ):
     
         ### COMPLETE
 
+        assert x.ndim == 1
+
         x_tab = np.vstack((x_tab,x))
         
         if np.linalg.norm(g) < stop:
