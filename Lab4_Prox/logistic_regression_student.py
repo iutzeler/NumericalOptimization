@@ -40,7 +40,6 @@ for i in range(m_test):
         b_test[i] = -1.0
 
 
-L = 0.25*max(np.linalg.norm(A,2,axis=1))**2 + lam2
 
 
 d = 27 # features
@@ -52,6 +51,7 @@ lam1 = 0.03 # for the 1-norm regularization best:0.03
 lam2 = 0.0
 
 
+L = 0.25*max(np.linalg.norm(A,2,axis=1))**2 + lam2
 
 # ## Oracles
 # 
